@@ -1,4 +1,5 @@
 #include "image.h"
+#include <string.h>
 
 inline int 
 CheckImageObject(PyObject *obj)
@@ -253,7 +254,20 @@ ImageObject_set_color(PyObject* self, PyObject *args)
     imlib_context_set_color(red, green, blue, alpha);
     
     Py_RETURN_NONE;
+}
 
+static inline PyObject *
+ImageObject_set_quality(PyObject* self, PyObject *args)
+{
+    int quality;
+    if (!PyArg_ParseTuple(args, "i:set_quality", &quality)) {
+        return NULL;
+    }
+
+    imlib_context_set_image(((ImageObject *)self)->image);
+    imlib_image_attach_data_value("quality", NULL, quality, NULL);
+
+    Py_RETURN_NONE;
 }
 
 static inline PyObject * 
@@ -313,6 +327,7 @@ static PyMethodDef ImageObject_methods[] = {
     
     {"attach_value", ImageObject_attach_value, METH_VARARGS, 0},
     {"set_color", ImageObject_set_color, METH_VARARGS, 0},
+    {"set_quality", ImageObject_set_quality, METH_VARARGS, 0},
     {"save", ImageObject_save, METH_VARARGS, 0},
     {NULL, NULL}
 };
