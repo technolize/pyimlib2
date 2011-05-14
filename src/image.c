@@ -1,5 +1,4 @@
 #include "image.h"
-#include <string.h>
 
 inline int 
 CheckImageObject(PyObject *obj)
@@ -186,6 +185,51 @@ ImageObject_save(PyObject* self, PyObject *args)
 
 }
 
+static inline PyObject *
+ImageObject_draw_pixel(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    int x, y;
+    int r=-1, g, b, alpha;
+
+    static char *keywords[] = {"x", "y", "color", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|(iiii):draw_pixel", keywords,
+                                     &x, &y, &r, &g, &b, &alpha)) {
+      return NULL;
+    }
+
+    imlib_context_set_image(((ImageObject *)self)->image);
+    if (r >= 0) {
+      imlib_context_set_color(r, g, b, alpha);
+    }
+
+    imlib_image_draw_pixel(x, y, 0);
+    Py_RETURN_NONE;
+}
+
+
+static inline PyObject *
+ImageObject_draw_line(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    int x1, y1, x2, y2;
+    int r=-1, g, b, alpha;
+
+    static char *keywords[] = {"x1", "y1", "x2", "y2", "color", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iiii|(iiii):draw_line", keywords,
+                                     &x1, &y1, &x2, &y2, &r, &g, &b, &alpha)) {
+      return NULL;
+    }
+
+    imlib_context_set_image(((ImageObject *)self)->image);
+    if (r >= 0) {
+      imlib_context_set_color(r, g, b, alpha);
+    }
+
+    imlib_image_draw_line(x1, y1, x2, y2, 0);
+    Py_RETURN_NONE;
+}
+
 static inline PyObject * 
 ImageObject_draw_rectangle(PyObject* self, PyObject *args, PyObject *kwargs)
 {
@@ -319,6 +363,8 @@ static PyMethodDef ImageObject_methods[] = {
     {"cropped_scaled_image", ImageObject_cropped_scaled_image, METH_VARARGS, 0},
     {"scaled_image", ImageObject_scaled_image, METH_VARARGS, 0},
     {"blend_image", (PyCFunction)ImageObject_blend_image, METH_VARARGS|METH_KEYWORDS, 0},
+    {"draw_pixel", (PyCFunction)ImageObject_draw_pixel, METH_VARARGS|METH_KEYWORDS, 0},
+    {"draw_line", (PyCFunction)ImageObject_draw_line, METH_VARARGS|METH_KEYWORDS, 0},
     {"draw_rectangle", (PyCFunction)ImageObject_draw_rectangle, METH_VARARGS|METH_KEYWORDS, 0},
     {"draw_ellipse", (PyCFunction)ImageObject_draw_ellipse, METH_VARARGS|METH_KEYWORDS, 0},
     {"orientate", ImageObject_orientate, METH_VARARGS, 0},
